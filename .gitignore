@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Data files (IMPORTANT)
+data/
+db/
+pdfs/
+
+# ChromaDB / vector DB
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Streamlit cache
+.streamlit/
+
+# HuggingFace cache 
+.cache/
+
+# Sentence transformers model cache
+models/
