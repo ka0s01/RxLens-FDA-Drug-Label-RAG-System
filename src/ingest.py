@@ -1,6 +1,7 @@
 import pdfplumber
 import re
 from sentence_transformers import SentenceTransformer
+import chromadb
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 SECTIONS = [
@@ -86,8 +87,25 @@ def embed_chunks(chunks):
     embeddings = model.encode(texts,device='cuda')
     return embeddings
 
+def store_chunks(chunks,embeddings):
+    client = chromadb.PersistentClient(path="./data/db")
+    collection = client.get_or_create_collection("drug_labels")
+    existing = collection.get(ids=[chunks[0]["chunk_id"]])
+    if existing["ids"]:
+        print("Already stored, skipping.")
+        return
+    collection.add(
+        documents=[chunk["text"] for chunk in chunks],
+        embeddings= embeddings.tolist(),
+        metadatas=[{"drug":chunk["drug_name"],"section":chunk["section"]}for chunk in chunks],
+        ids=[chunk["chunk_id"] for chunk in chunks]
+    )
+    print(f"Stored {len(chunks)} chunks")
+
+
 
 chunks = parse_pdf("data/pdfs/warfarin.pdf","Warfarin")
 embeddings = embed_chunks(chunks)
 print(embeddings.shape)
 print(embeddings[0][:5])
+store_chunks(chunks, embeddings)
