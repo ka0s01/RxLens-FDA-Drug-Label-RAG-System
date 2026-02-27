@@ -1,5 +1,8 @@
 import pdfplumber
 import re
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
 SECTIONS = [
     "INDICATIONS AND USAGE",
     "DOSAGE AND ADMINISTRATION",
@@ -19,7 +22,7 @@ def extract_text_by_page(pdf_path):
                 pages.append(text)
     return pages
 
-def parse_section(pages):
+def parse_sections(pages):
     full_text = "\n".join(pages)
     sections = {}
     current_section = None
@@ -38,8 +41,53 @@ def parse_section(pages):
 
     return sections
 
+'''
+{
+    "text": "Warfarin is contraindicated in patients with hemorrhagic tendencies...",
+    "drug_name": "Warfarin",
+    "section": "CONTRAINDICATIONS",
+    "chunk_id": "warfarin_contraindications_0"
+}
 
-pages = extract_text_by_page("data/pdfs/warfarin.pdf")
-d = parse_section(pages)
-print(d.keys())
-print(d["CONTRAINDICATIONS"][:300])
+'''
+def chunk_sections(text,drug_name,section,chunk_size=400,overlap=50):
+    chunks = []
+    start = 0
+    while start<len(text):
+        end = min(start+chunk_size,len(text))
+        chunk_text = text[start:end].strip()
+        if chunk_text:
+            chunks . append({
+                "text" : chunk_text,
+                "drug_name": drug_name,
+                "section": section,
+                "chunk_id":f"{drug_name.lower()}_{section.lower().replace(' ','_')}_{len(chunks)}"
+            })
+        start = end-overlap
+        if end == len(text):
+            break
+    return chunks
+
+
+def chunk_drug(sections_dict,drug_name):
+    chunks = []
+    for section in sections_dict:
+        chunks.extend(chunk_sections(sections_dict[section],drug_name,section))
+    return chunks
+
+def parse_pdf(pdf_path,drug_name):
+    pages = extract_text_by_page(pdf_path)
+    sections = parse_sections(pages)
+    chunks = chunk_drug(sections,drug_name)
+    return chunks
+
+def embed_chunks(chunks):
+    texts = [chunk["text"] for chunk in chunks]
+    embeddings = model.encode(texts,device='cuda')
+    return embeddings
+
+
+chunks = parse_pdf("data/pdfs/warfarin.pdf","Warfarin")
+embeddings = embed_chunks(chunks)
+print(embeddings.shape)
+print(embeddings[0][:5])
