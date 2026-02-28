@@ -26,8 +26,4 @@ def generate_answer(question,results):
             "stream": False
         }
     )
-    return response
-
-results = retrieve("can i take aspirin and warfarin together")
-answer = generate_answer("can i take aspirin and warfarin together", results)
-print(answer.json()["response"]) 
+    return response.json()['response']

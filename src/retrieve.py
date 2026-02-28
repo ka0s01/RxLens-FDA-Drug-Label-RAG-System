@@ -1,6 +1,8 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
 model = SentenceTransformer('all-MiniLM-L6-v2')
+import os
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'db')
 
 def build_where(drug_filter, section_filter):
     conditions = []
@@ -28,7 +30,7 @@ def extract_drug_filter(question):
     return found if found else None
 
 def retrieve(query, drug_filter=None, section_filter=None, k=8):
-    client = chromadb.PersistentClient(path="./data/db")
+    client = chromadb.PersistentClient(path=DB_PATH)
     collection = client.get_collection("drug_labels")
     query_embedding = model.encode([query], device='cuda').tolist()
     

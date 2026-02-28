@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 import os
 model = SentenceTransformer('all-MiniLM-L6-v2')
-
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'db')
 SECTIONS = [
     "INDICATIONS AND USAGE",
     "DOSAGE AND ADMINISTRATION",
@@ -96,7 +96,7 @@ def embed_chunks(chunks):
     return embeddings
 
 def store_chunks(chunks,embeddings):
-    client = chromadb.PersistentClient(path="./data/db")
+    client = chromadb.PersistentClient(path=DB_PATH)
     collection = client.get_or_create_collection("drug_labels")
     existing = collection.get(ids=[chunks[0]["chunk_id"]])
     if existing["ids"]:
