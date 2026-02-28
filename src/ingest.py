@@ -2,6 +2,7 @@ import pdfplumber
 import re
 from sentence_transformers import SentenceTransformer
 import chromadb
+import os
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 SECTIONS = [
@@ -38,7 +39,7 @@ def parse_sections(pages):
             current_section = normalized
             sections[current_section] = ""
         elif current_section:
-            sections[current_section] += clean
+            sections[current_section] += (clean + "\n")
 
     return sections
 
@@ -56,6 +57,10 @@ def chunk_sections(text,drug_name,section,chunk_size=400,overlap=50):
     start = 0
     while start<len(text):
         end = min(start+chunk_size,len(text))
+        if end < len(text):
+            last_space = text.rfind(' ', start, end)
+            if last_space > start:
+                end = last_space
         chunk_text = text[start:end].strip()
         if chunk_text:
             chunks . append({
@@ -83,7 +88,10 @@ def parse_pdf(pdf_path,drug_name):
     return chunks
 
 def embed_chunks(chunks):
-    texts = [chunk["text"] for chunk in chunks]
+    texts = [
+        f"{chunk['drug_name']} | {chunk['section']} | {chunk['text']}"
+        for chunk in chunks
+    ]
     embeddings = model.encode(texts,device='cuda')
     return embeddings
 
@@ -104,8 +112,15 @@ def store_chunks(chunks,embeddings):
 
 
 
-chunks = parse_pdf("data/pdfs/warfarin.pdf","Warfarin")
-embeddings = embed_chunks(chunks)
-print(embeddings.shape)
-print(embeddings[0][:5])
-store_chunks(chunks, embeddings)
+
+
+pdf_dir = "./data/pdfs"
+
+for filename in os.listdir(pdf_dir):
+    if filename.endswith(".pdf"):
+        drug_name = filename.replace(".pdf", "").capitalize()
+        pdf_path = os.path.join(pdf_dir, filename)  # ← filename not drug_name
+        chunks = parse_pdf(pdf_path, drug_name)
+        print(f"{drug_name}: {len(chunks)} chunks")
+        embeddings = embed_chunks(chunks)
+        store_chunks(chunks, embeddings)
