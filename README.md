@@ -8,7 +8,7 @@ This project focuses on building a RAG pipeline from scratch without abstraction
 
 ---
 
-## What This Project Does
+## What RxLens Does
 
 - Parses FDA drug label PDFs
 - Extracts specific high-value medical sections
