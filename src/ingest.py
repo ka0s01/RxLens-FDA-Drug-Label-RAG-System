@@ -4,7 +4,9 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 import os
 model = SentenceTransformer('all-MiniLM-L6-v2')
-DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'db')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, '..', 'data', 'db')
+pdf_dir = os.path.join(BASE_DIR, '..', 'data', 'pdfs')
 SECTIONS = [
     "INDICATIONS AND USAGE",
     "DOSAGE AND ADMINISTRATION",
@@ -115,12 +117,12 @@ def store_chunks(chunks,embeddings):
 
 
 pdf_dir = "./data/pdfs"
-
-for filename in os.listdir(pdf_dir):
-    if filename.endswith(".pdf"):
-        drug_name = filename.replace(".pdf", "").capitalize()
-        pdf_path = os.path.join(pdf_dir, filename)  # ← filename not drug_name
-        chunks = parse_pdf(pdf_path, drug_name)
-        print(f"{drug_name}: {len(chunks)} chunks")
-        embeddings = embed_chunks(chunks)
-        store_chunks(chunks, embeddings)
+if __name__ == "__main__":
+    for filename in os.listdir(pdf_dir):
+        if filename.endswith(".pdf"):
+            drug_name = filename.replace(".pdf", "").capitalize()
+            pdf_path = os.path.join(pdf_dir, filename)
+            chunks = parse_pdf(pdf_path, drug_name)
+            print(f"{drug_name}: {len(chunks)} chunks")
+            embeddings = embed_chunks(chunks)
+            store_chunks(chunks, embeddings)
