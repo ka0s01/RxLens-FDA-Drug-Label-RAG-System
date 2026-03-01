@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/db:/app/data/db
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: uvicorn src.api:app --host 0.0.0.0 --port 8000
+
+  ui:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434
+    depends_on:
+      - api
+    command: streamlit run src/ui.py --server.port 8501 --server.address 0.0.0.0
