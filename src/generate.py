@@ -1,6 +1,8 @@
 import requests
 from retrieve import retrieve
+import os
 
+OLLAMA_URL = os.getenv("OLLAMA_URL","http://localhost:11434")
 
 def generate_answer(question,results):
     context = ""
@@ -19,11 +21,7 @@ def generate_answer(question,results):
 
     Answer:"""
     response = requests.post(
-        'http://localhost:11434/api/generate',
-        json={
-            "model": "mistral",
-            "prompt": prompt,
-            "stream": False
-        }
+        f'{OLLAMA_URL}/api/generate',
+        json={"model": "mistral", "prompt": prompt, "stream": False}
     )
     return response.json()['response']
