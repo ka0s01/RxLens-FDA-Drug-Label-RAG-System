@@ -1,4 +1,4 @@
-# RxLens — FDA Drug Label Intelligence System
+# RxLens — FDA Drug Label Rag System
 
 RxLens is a local RAG system that answers natural language questions using FDA drug label data.
 
