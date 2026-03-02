@@ -128,46 +128,81 @@ This project focuses on building a RAG pipeline from scratch without abstraction
 
 ## Running the Project
 
-### 1. Clone the repository
+### Option 1 — Docker (recommended)
+
+**Prerequisites:**
+- [Docker Desktop](https://docker.com) installed and running
+- [Ollama](https://ollama.ai) installed natively with Mistral pulled
 
 ```bash
-git clone 
-cd fda-rag
-```
-
-### 2. Create virtual environment
-
-```bash
-python -m venv venv
-venv\Scripts\activate   # Windows
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Start Ollama
-
-```bash
-ollama serve
 ollama pull mistral
+ollama serve
 ```
 
-### 5. Run FastAPI backend
+Then in a separate terminal from the project root:
 
 ```bash
-uvicorn api:app --reload
+docker-compose up
 ```
 
-### 6. Run Streamlit frontend
+Open `http://localhost:8501` in your browser.
 
+That's it. Both the API and UI start automatically.
+
+To stop:
 ```bash
-streamlit run app.py
+docker-compose down
 ```
 
 ---
+
+### Option 2 — Local (manual)
+
+**Prerequisites:**
+- Python 3.12
+- Ollama installed with Mistral pulled
+
+```bash
+# 1. Clone and set up environment
+git clone https://github.com/yourusername/rxlens
+cd rxlens
+python -m venv venv
+venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+
+# 2. Start Ollama
+ollama serve
+ollama pull mistral
+
+# 3. Ingest drug label PDFs
+# Place PDFs in data/pdfs/ then run:
+python src/ingest.py
+
+# 4. Terminal 1 — Start API
+cd src
+uvicorn api:app --reload
+
+# 5. Terminal 2 — Start UI
+cd src
+streamlit run ui.py
+```
+
+Open `http://localhost:8501` in your browser.
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/query` | Ask a question, returns answer + sources |
+| `GET` | `/drugs` | List all indexed drug labels |
+| `POST` | `/ingest` | Upload and index a new PDF |
+
+Auto-generated API docs available at `http://localhost:8000/docs`
+
+---
+
 
 
 ## Current Features
@@ -191,20 +226,19 @@ streamlit run app.py
 * Multi- drug queries may not be handled properly
 * No caching
 * Sensitive to PDF formatting inconsistencies
+  
 ---
 
-## Future Improvements
+### In Progress
+- HyDE (Hypothetical Document Embeddings) — generates a hypothetical answer first, embeds that instead of the raw question, significantly improves retrieval accuracy
+- Evaluation framework — automated test set to measure retrieval precision
+- Hybrid search — combining semantic search with BM25 keyword search for better handling of medical terminology
 
-* Query parsing (extract drugs, intent, section automatically)
-* Multi-drug interaction handling
-* Cross-encoder reranking for better retrieval quality
-* HyDE (Hypothetical Document Embeddings) for improved search
-* Better section detection and normalization
-* Response structuring (bullet points, summaries)
-* Add more FDA sections dynamically
-* Caching layer for faster responses
-* Deploy as API + frontend (production-ready architecture)
-* Authentication and multi-user support
+### Planned
+- Cross-encoder reranking for higher retrieval precision
+- Conversation history for multi-turn queries
+- Dynamic section detection for non-standard label formats
+- Authentication and multi-user support
 
 ---
 
