@@ -1,5 +1,6 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
+from hyde import generate_hypothetical_answer
 model = SentenceTransformer('all-MiniLM-L6-v2')
 import os
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'db')
@@ -32,7 +33,11 @@ def extract_drug_filter(question):
 def retrieve(query, drug_filter=None, section_filter=None, k=8):
     client = chromadb.PersistentClient(path=DB_PATH)
     collection = client.get_collection("drug_labels")
-    query_embedding = model.encode([query], device='cuda').tolist()
+    hypothetical_answer = generate_hypothetical_answer(query)
+
+    hypothetical_answer_embedding =  model.encode([hypothetical_answer], device='cuda').tolist()
+
+    # query_embedding = model.encode([query], device='cuda').tolist()
     
     if not drug_filter:
         drug_filter = extract_drug_filter(query)
@@ -40,7 +45,7 @@ def retrieve(query, drug_filter=None, section_filter=None, k=8):
     where = build_where(drug_filter, section_filter)
     
     results = collection.query(
-        query_embeddings=query_embedding,
+        query_embeddings=hypothetical_answer_embedding,
         n_results=k,
         where=where
     )
