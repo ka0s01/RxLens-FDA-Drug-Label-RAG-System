@@ -229,18 +229,14 @@ Auto-generated API docs available at `http://localhost:8000/docs`
   
 ---
 
-### In Progress
-- HyDE (Hypothetical Document Embeddings) — generates a hypothetical answer first, embeds that instead of the raw question, significantly improves retrieval accuracy
-- Evaluation framework — automated test set to measure retrieval precision
-- Hybrid search — combining semantic search with BM25 keyword search for better handling of medical terminology
+## Updates
+**v1.2 — HyDE Retrieval**
+Implemented Hypothetical Document Embedding (HyDE). Instead of embedding the raw user question, the system first generates a hypothetical answer using mistral, embeds that, then searches ChromaDB. This significantly improves retrieval accuracy for complex queries by searching with an answer-shaped vector rather than a question-shaped vector.
 
-### Planned
-- Cross-encoder reranking for higher retrieval precision
-- Conversation history for multi-turn queries
-- Dynamic section detection for non-standard label formats
-- Authentication and multi-user support
+**v1.1 — Containerized Deployment**
+Dockerized the FastAPI and Streamlit services using Docker Compose. Both services start with a single `docker-compose up` command. ChromaDB data persists via a volume mount. Ollama runs natively on the host machine and containers communicate with it via `host.docker.internal`.
 
----
+**v1.0 — Initial Release**
 
 ## Key Idea
 
