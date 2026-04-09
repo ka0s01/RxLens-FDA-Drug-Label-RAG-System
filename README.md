@@ -107,11 +107,12 @@ This project focuses on building a RAG pipeline from scratch without abstraction
 ## Retrieval Pipeline
 
 1. User submits query
-2. Query is embedded using SentenceTransformer
-3. Optional filtering:
+2. Query is passed to the LLM and a hypothetical answer is generatd (HyDE)
+3. Hypothetical answer is embedded using SentenceTransforme
+4. Optional filtering:
    * by drug
    * by section
-4. ChromaDB retrieves top-k similar chunks
+5. ChromaDB retrieves top-k similar chunks
 6. Retrieved context is passed to the LLM
 
 ---
